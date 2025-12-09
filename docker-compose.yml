@@ -1,0 +1,123 @@
+services:
+  zookeeper:
+    image: bitnamilegacy/zookeeper:3.6.2
+    container_name: zookeeper
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports:
+      - "2181:2181"
+    volumes:
+      - ./zookeeper_data:/bitnami/zookeeper    # <--- persist zookeeper state
+    restart: always
+
+  kafka:
+    image: bitnamilegacy/kafka:3.4.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      - BITNAMI_DEBUG=true
+      - KAFKA_ENABLE_KRAFT=no
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://0.0.0.0:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CREATE_TOPICS=transactions:1:1
+    volumes:
+      - ./kafka_data:/bitnami/kafka
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "bash", "-lc", "/opt/bitnami/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  fraud_consumer:
+    # ... (unchanged)
+    build:
+      context: ./spark-consumer
+      dockerfile: Dockerfile
+    image: fraud_consumer:latest
+    container_name: fraud_consumer
+    depends_on:
+      - kafka
+    volumes:
+      - ./model:/app/model:ro
+      - ./data:/app/data
+      - ./spark-consumer/consumer.py:/app/consumer.py:ro
+      - ./spark-consumer/alert_email.py:/app/alert_email.py:ro
+      - ./checkpoints:/app/checkpoints
+    environment:
+      - MODEL_PATH=/app/model/xgboost_caliberated.joblib
+      - SCALER_PATH=/app/model/standard_scaler.joblib
+      - DB_PATH=/app/data/fraud_detection.db
+      - KAFKA_BOOTSTRAP=kafka:9092
+      - EMAIL_USER=${EMAIL_USER}
+      - EMAIL_PASS=${EMAIL_PASS}
+      - ALERT_RECEIVER=${ALERT_RECEIVER}
+      - FRAUD_THRESHOLD=0.001
+    restart: unless-stopped
+
+  fastapi:
+    # ... (unchanged)
+    build:
+      context: ./fastapi
+      dockerfile: Dockerfile
+    image: fraud_api:latest
+    container_name: fraud_api
+    ports:
+      - "8080:8080"
+    depends_on:
+      - kafka
+    volumes:
+      - ./model:/app/model:ro
+      - ./data:/app/data
+      - ./fastapi/app.py:/app/app.py:ro
+      - ./fastapi/alert_email.py:/app/alert_email.py:ro
+    environment:
+      - MODEL_PATH=/app/model/xgboost_caliberated.joblib
+      - SCALER_PATH=/app/model/standard_scaler.joblib
+      - DB_PATH=/app/data/fraud_detection.db
+      - MODEL_VERSION=xgboost_caliberated
+      - FRAUD_THRESHOLD=0.001
+    restart: unless-stopped
+
+  fraud_dashboard:
+    # ... (unchanged)
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fraud_dashboard:latest
+    container_name: fraud_dashboard
+    ports:
+      - "8501:8501"
+    depends_on:
+      - fraud_consumer
+    volumes:
+      - ./fraud-dashboard/realtime_dashboard.py:/app/realtime_dashboard.py:ro
+      - ./data:/app/data
+      - ./model:/app/model:ro
+    environment:
+      - DB_PATH=/app/data/fraud_detection.db
+    restart: unless-stopped
+
+  producer:
+    # ... (unchanged)
+    build:
+      context: ./producer
+      dockerfile: Dockerfile
+    image: kafka_producer:latest
+    container_name: kafka_producer
+    depends_on:
+      - kafka
+    volumes:
+      - ./data:/app/data
+    environment:
+      - KAFKA_BOOTSTRAP=kafka:9092
+      - DB_PATH=/app/data/fraud_detection.db
+    restart: "no"

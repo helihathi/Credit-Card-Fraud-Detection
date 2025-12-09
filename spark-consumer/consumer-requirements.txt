@@ -1,0 +1,7 @@
+numpy
+pandas
+joblib
+python-dotenv
+confluent-kafka
+xgboost==2.1.4
+scikit-learn==1.6.0

@@ -1,0 +1,8 @@
+numpy
+pandas
+joblib
+fastapi
+uvicorn[standard]
+python-dotenv
+xgboost==2.1.4
+scikit-learn==1.6.0
