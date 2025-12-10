@@ -1,4 +1,4 @@
-# 🌐🔍 Credit Card Fraud Detection — Real-Time ML Pipeline (Docker-only)
+# 🌐🔍 Credit Card Fraud Detection — Real-Time ML Pipeline
 ### 🚀 End-to-End Streaming System using Kafka, Spark, FastAPI, XGBoost, Streamlit & Docker
 
 > ⚠️ **Important:** This repository runs *only via Docker / Docker Compose*. Manual execution (`python app.py`, `streamlit run`, etc.) is **not supported** for reproducing the end-to-end pipeline. Everything below assumes Docker is available on your machine.
