@@ -145,7 +145,7 @@ This is advisable just to ensure Kafka is ready before consumers connect.
 Rebuild specific services after code changes:
 
 ```bash
-# rebuild only fastapi and spark-consumer
+# for example rebuild only fastapi and spark-consumer
 docker-compose build fastapi spark-consumer
 
 # bring them up
@@ -189,38 +189,13 @@ curl http://localhost:8000/health
 
 ---
 
-## 🔁 Model updates (Docker workflow)
-
-If you retrain the model locally and create new joblib files:
-
-1. Replace the files in `model/` locally.  
-2. Rebuild images that bundle the model (typically `spark-consumer` and `fastapi`):
-
-```bash
-docker-compose build spark-consumer fastapi
-docker-compose up -d spark-consumer fastapi
-```
-
-Alternatively, mount `./model` as a volume into the containers so you can swap models without rebuilding.
-
----
-
-## ⚠️ Troubleshooting tips
-
-- If a consumer cannot connect to Kafka, ensure Kafka advertises the listener reachable by the container (check `KAFKA_ADVERTISED_LISTENERS`).  
-- If ports are in use (2181/9092/8000/8501), change them in `.env` and `docker-compose.yml`.  
-- If images fail to build due to missing model files, ensure `model/` contains the `.joblib` files or configure auto-download in the Dockerfile.
-
----
-
 ## 🖼 Screenshots
 
-```markdown
-<p align="center">
-  <img src="docs/dashboard.png" width="700" alt="Dashboard screenshot"/>
-</p>
-```
-
+### Dashboard Images
+![Dashboard - 1](https://raw.githubusercontent.com/helihathi/Credit-Card-Fraud-Detection/master/docs/dash1.jpg)
+![Dashboard - 2](https://raw.githubusercontent.com/helihathi/Credit-Card-Fraud-Detection/master/docs/dash2.jpg)
+![Dashboard - 3](https://raw.githubusercontent.com/helihathi/Credit-Card-Fraud-Detection/master/docs/dash3.jpg)
+![Dashboard - 4](https://raw.githubusercontent.com/helihathi/Credit-Card-Fraud-Detection/master/docs/dash4.jpg)
 ---
 
 ## 🔗 Dataset (source & download)
