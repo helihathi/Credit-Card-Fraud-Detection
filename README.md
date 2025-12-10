@@ -40,7 +40,7 @@ credit-card-fraud-detection/
 │   └── standard_scaler.joblib           # Preprocessing scaler
 │
 ├── notebook/                            # Training notebooks
-│   └── *.ipynb
+│   └── Credit_Card_Fraud_detection.ipynb
 │
 ├── producer/                            # Kafka transaction generator
 │   ├── producer.py
@@ -79,7 +79,7 @@ Add `.env` to `.gitignore`
 
 ### A — Full stack with docker-compose (one command)
 
-1. Build and start everything (in detached mode):
+1. Build and start everything:
 
 ```bash
 docker-compose up --build -d
@@ -113,6 +113,11 @@ docker-compose down -v
 
 ## 🔁 How to execute the container
 ## Start Zookeeper + Kafka via docker-compose, then start the stack
+
+First pull the `zookeeper` and `kafka` images from docker using
+```bash
+
+```
 
 If your `docker-compose.yml` already defines `zookeeper` and `kafka` services, you can bring them up first and wait, then start others:
 
