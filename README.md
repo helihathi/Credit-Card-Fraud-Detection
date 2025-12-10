@@ -15,7 +15,7 @@ This project provides a **real-time credit card fraud detection pipeline** using
 
 - Docker-first: the full stack runs only inside containers.  
 - Reproducible: clone → `docker-compose up --build -d` → open dashboard.  
-- Model files included: `model/xgboost_caliberated.joblib`, `model/standard_scaler.joblib` (13 MB).
+- Model files included: `model/xgboost_caliberated.joblib`, `model/standard_scaler.joblib`.
 
 ---
 
