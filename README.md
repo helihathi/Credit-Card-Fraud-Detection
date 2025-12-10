@@ -116,23 +116,27 @@ docker-compose down -v
 
 First pull the `zookeeper` and `kafka` images from docker using
 ```bash
+# Pull Zookeeper Image from docker
+docker pull bitnamilegacy/zookeeper:3.6.2
 
+# Pull Kafka Image from docker
+docker pull bitnamilegacy/kafka:3.4.0
 ```
 
 If your `docker-compose.yml` already defines `zookeeper` and `kafka` services, you can bring them up first and wait, then start others:
 
 ```bash
-# start only zookeeper & kafka
-docker-compose up -d zookeeper kafka
+# start only zookeeper first
+docker-compose up -d zookeeper
 
-# wait a bit (Zookeeper + Kafka initialization)
-sleep 10
+# start only kafka (after 30 seconds of starting zookeeper)
+docker compose up -d kafka
 
-# then start the rest
+# then start the rest (after starting kafka)
 docker-compose up -d producer spark-consumer fastapi fraud-dashboard
 ```
 
-This is useful if you want to ensure Kafka is ready before consumers connect.
+This is advisable just to ensure Kafka is ready before consumers connect.
 
 ---
 
@@ -209,6 +213,22 @@ Alternatively, mount `./model` as a volume into the containers so you can swap m
 
 ---
 
+## 🖼 Screenshots
+
+```markdown
+<p align="center">
+  <img src="docs/dashboard.png" width="700" alt="Dashboard screenshot"/>
+</p>
+```
+
+---
+
+## 🔗 Dataset (source & download)
+
+This project uses the popular **Kaggle Credit Card Fraud Detection** dataset:
+
+- **Kaggle dataset page:** https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud
+---
 ## 📜 License
 
 This repository uses the **MIT License** (see `LICENSE`).
